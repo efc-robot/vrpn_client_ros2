@@ -118,45 +118,52 @@ void VRPNListener::refresh_trackers()
     for (int i = 0; _vrpn_connection->sender_name(i) != NULL; i++)
     {
         std::string sender_name = _vrpn_connection->sender_name(i);
-        std::string &tracker_name = sender_name;
-        std::string &synchronizer_name = sender_name;
-        std::string rigid_name = sender_name;
-        replaceSpace(rigid_name);
 
         if (_synchronizers.count(sender_name) != 0)
         {
             continue;
         }
-
-        RCLCPP_INFO_STREAM(this->get_logger(), "Found new sender: " << sender_name);
-
-        // new synchronizer
-        std::shared_ptr<Synchronizer> new_synchronizer = std::make_shared<Synchronizer>();
-        new_synchronizer->sender_name = sender_name;
-        new_synchronizer->listener_ptr = this;
-        new_synchronizer->vrpn_tracker = std::make_shared<vrpn_Tracker_Remote>(tracker_name.c_str(), _vrpn_connection.get());
-        std::string pose_topic_name = "/vrpn/" + rigid_name + "/pose";
-        std::string twist_topic_name = "/vrpn/" + rigid_name + "/twist";
-        std::string accel_topic_name = "/vrpn/" + rigid_name + "/accel";
-        new_synchronizer->pose_publisher = this->create_publisher<geometry_msgs::msg::PoseStamped>(pose_topic_name, 1);
-        new_synchronizer->twist_publisher = this->create_publisher<geometry_msgs::msg::TwistStamped>(twist_topic_name, 1);
-        new_synchronizer->accel_publisher = this->create_publisher<geometry_msgs::msg::AccelStamped>(accel_topic_name, 1);
-
-        // register tracker change handler
-        new_synchronizer->vrpn_tracker->register_change_handler(new_synchronizer.get(), &VRPNListener::handlePose);
-        new_synchronizer->vrpn_tracker->register_change_handler(new_synchronizer.get(), &VRPNListener::handleTwist);
-        new_synchronizer->vrpn_tracker->register_change_handler(new_synchronizer.get(), &VRPNListener::handleAccel);
-
-        // create new tracker mainloop timer
-        this->create_wall_timer(
-            std::chrono::seconds(1) / _tracker_mainloop_frequency,
-            std::bind(&vrpn_Tracker_Remote::mainloop, new_synchronizer->vrpn_tracker));
-
-        // register new synchronizer
-        _synchronizers.insert(std::make_pair(synchronizer_name, new_synchronizer));
-
-        RCLCPP_INFO_STREAM(this->get_logger(), "New synchronizer created: " << synchronizer_name);
+        else
+        {
+            RCLCPP_INFO_STREAM(this->get_logger(), "Found new sender: " << sender_name);
+            createSynchronizer(sender_name);
+        }
     }
+}
+
+void VRPNListener::createSynchronizer(std::string sender_name)
+{
+    std::string &tracker_name = sender_name;
+    std::string &synchronizer_name = sender_name;
+    std::string rigid_name = sender_name;
+    replaceSpace(rigid_name);
+
+    // new synchronizer
+    std::shared_ptr<Synchronizer> new_synchronizer = std::make_shared<Synchronizer>();
+    new_synchronizer->sender_name = sender_name;
+    new_synchronizer->listener_ptr = this;
+    new_synchronizer->vrpn_tracker = std::make_shared<vrpn_Tracker_Remote>(tracker_name.c_str(), _vrpn_connection.get());
+    std::string pose_topic_name = "/vrpn/" + rigid_name + "/pose";
+    std::string twist_topic_name = "/vrpn/" + rigid_name + "/twist";
+    std::string accel_topic_name = "/vrpn/" + rigid_name + "/accel";
+    new_synchronizer->pose_publisher = this->create_publisher<geometry_msgs::msg::PoseStamped>(pose_topic_name, 1);
+    new_synchronizer->twist_publisher = this->create_publisher<geometry_msgs::msg::TwistStamped>(twist_topic_name, 1);
+    new_synchronizer->accel_publisher = this->create_publisher<geometry_msgs::msg::AccelStamped>(accel_topic_name, 1);
+
+    // register tracker change handler
+    new_synchronizer->vrpn_tracker->register_change_handler(new_synchronizer.get(), &VRPNListener::handlePose);
+    new_synchronizer->vrpn_tracker->register_change_handler(new_synchronizer.get(), &VRPNListener::handleTwist);
+    new_synchronizer->vrpn_tracker->register_change_handler(new_synchronizer.get(), &VRPNListener::handleAccel);
+
+    // create new tracker mainloop timer
+    this->create_wall_timer(
+        std::chrono::seconds(1) / _tracker_mainloop_frequency,
+        std::bind(&vrpn_Tracker_Remote::mainloop, new_synchronizer->vrpn_tracker));
+
+    // register new synchronizer
+    _synchronizers.insert(std::make_pair(synchronizer_name, new_synchronizer));
+
+    RCLCPP_INFO_STREAM(this->get_logger(), "New synchronizer created: " << synchronizer_name);
 }
 
 void VRPNListener::mainloop()
@@ -192,6 +199,7 @@ void VRPNListener::loadParams()
     loadParam(std::string("refresh_trackers_frequency"), 1.0, _refresh_trackers_frequency);
     loadParam(std::string("tracker_mainloop_frequency"), 100.0, _tracker_mainloop_frequency);
 }
+
 void VRPNListener::replaceSpace(std::string &ori_str)
 {
     for (int i = 0; i < int(ori_str.size()); i++)

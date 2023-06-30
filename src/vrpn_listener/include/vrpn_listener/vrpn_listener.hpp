@@ -54,6 +54,7 @@ private:
     void loadParam(std::string param_name, T default_value, T &param);
     void loadParams();
     void replaceSpace(std::string &ori_str);
+    void createSynchronizer(std::string sender_name);
 
 public:
     VRPNListener(std::string name);
