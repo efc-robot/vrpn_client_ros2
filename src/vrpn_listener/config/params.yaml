@@ -1,0 +1,8 @@
+/vrpn_listener:
+  ros__parameters:
+    server: 192.168.3.41
+    port: 3883
+    frame_id: "world"
+    mainloop_frequency: 100.0 #240.0
+    refresh_trackers_frequency: 1.0
+    tracker_mainloop_frequency: 100.0

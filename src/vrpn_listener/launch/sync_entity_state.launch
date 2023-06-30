@@ -1,0 +1,6 @@
+<launch>
+    <arg name="server" default="localhost"/>
+    <node name="vrpn_listener" pkg="vrpn_listener" exec="vrpn_listener"  output="screen">
+        <param from="$(find-pkg-share vrpn_listener)/config/params.yaml"/>
+    </node>
+</launch>
