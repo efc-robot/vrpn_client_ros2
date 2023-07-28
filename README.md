@@ -49,7 +49,7 @@ Ros2 package for transport vrpn data to ros2 topic
    执行以下命令编译vrpn_client_ros2：
 
    ```bash
-      source /opt/${ROS_DISTRO}/setup.bash
+      source /opt/ros/${ROS_DISTRO}/setup.bash
       cd vrpn_client_ros2/src
       colcon build
    ```
