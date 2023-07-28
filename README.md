@@ -20,9 +20,15 @@ Ros2 package for transport vrpn data to ros2 topic
       sudo make install
    ```
 
-2. **配置VRPN server参数**
+2. **拉取vrpn_client_ros2代码，并配置VRPN server参数**
    
-   编辑配置文件 `vrpn_client_ros2/src/vrpn_listener/config/params.yaml`：
+   执行以下命令拉取vrpn_client_ros2代码：
+
+   ```bash
+      git clone https://github.com/efc-robot/vrpn_client_ros2
+   ```
+
+   拉取完成后，编辑代码中的配置文件 `vrpn_client_ros2/src/vrpn_listener/config/params.yaml`：
 
    ``` yaml
       /vrpn_listener:
