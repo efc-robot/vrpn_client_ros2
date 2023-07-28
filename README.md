@@ -46,7 +46,7 @@ Ros2 package for transport vrpn data to ros2 topic
 
 3. **编译package**
 
-   执行以下命令编译vrpn_client_ros2：
+   执行以下命令编译vrpn_client_ros2,其中 `${ROS_DISTRO}` 替换为实际使用的ROS2版本：
 
    ```bash
       source /opt/ros/${ROS_DISTRO}/setup.bash
